@@ -30,6 +30,8 @@ docker compose logs cfx-server
 
 ## CasaOS
 
+The CasaOS compose uses host ports `30121` and `40121` so it can coexist with a Legacy server on `30120` and `40120`.
+
 Prepare the data directory and seccomp profile:
 
 ```bash
@@ -42,10 +44,10 @@ Then import `casaos-compose.yaml` through CasaOS Custom Install.
 
 ## Ports
 
-| Port | Protocol | Purpose |
+| Setup | FiveM | txAdmin |
 | --- | --- | --- |
-| `30120` | TCP/UDP | FiveM server |
-| `40120` | TCP | txAdmin |
+| Standard Compose | `30120` TCP/UDP | `40120` TCP |
+| CasaOS Compose | `30121` TCP/UDP | `40121` TCP |
 
 ## Important
 
