@@ -9,6 +9,10 @@ services:
     stdin_open: true
     tty: true
 
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
     security_opt:
       - seccomp=/DATA/AppData/cfx-server-docker/seccomp.json
 
@@ -27,6 +31,28 @@ services:
       - "30120:30120/udp"
       - "40120:40120/tcp"
 
+  mariadb:
+    image: mariadb:12.3.2
+    container_name: cfx-server-mariadb
+    hostname: mariadb
+    restart: unless-stopped
+
+    environment:
+      MARIADB_ROOT_PASSWORD: REPLACE_WITH_A_LONG_RANDOM_ROOT_PASSWORD
+      MARIADB_DATABASE: qbox
+      MARIADB_USER: qbox
+      MARIADB_PASSWORD: REPLACE_WITH_A_LONG_RANDOM_DATABASE_PASSWORD
+
+    volumes:
+      - /DATA/AppData/cfx-server-docker/mariadb:/var/lib/mysql
+
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
 x-casaos:
   architectures:
     - amd64
@@ -41,7 +67,7 @@ x-casaos:
   tagline:
     en_us: FiveM server for GTAV Enhanced
   description:
-    en_us: Experimental Cfx Server build for FiveM GTAV Enhanced with txAdmin.
+    en_us: Experimental Cfx Server build for FiveM GTAV Enhanced with txAdmin and MariaDB.
   port_map: "40120"
   scheme: http
   index: /
