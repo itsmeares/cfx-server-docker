@@ -4,6 +4,7 @@ Minimal Docker image for **Cfx Server / FiveM for GTAV Enhanced (early access)**
 
 - Cfx Server build `98-ea`
 - txAdmin included
+- MariaDB `12.3.2` included in the Compose setup
 - Runs as non-root UID/GID `1000`
 - Uses a narrow seccomp profile that permits only `io_uring_setup` and `io_uring_enter` beyond Docker's default profile
 
@@ -12,7 +13,13 @@ Minimal Docker image for **Cfx Server / FiveM for GTAV Enhanced (early access)**
 ```bash
 git clone https://github.com/itsmeares/cfx-server-docker.git
 cd cfx-server-docker
-mkdir -p txData
+cp .env.example .env
+mkdir -p txData mariadb
+```
+
+Replace both password placeholders in `.env`, then start the stack:
+
+```bash
 docker compose up -d
 ```
 
@@ -28,17 +35,38 @@ Get the registration PIN:
 docker compose logs cfx-server
 ```
 
+## Database
+
+MariaDB is available only on the internal Compose network. Port `3306` is not published to the host.
+
+Use these values when a txAdmin recipe asks for database details:
+
+| Field | Value |
+| --- | --- |
+| Database Host | `mariadb` |
+| Database Port | `3306` |
+| Database Username | Value of `MARIADB_USER` (`qbox` by default) |
+| Database Password | Value of `MARIADB_PASSWORD` |
+| Database Name | Value of `MARIADB_DATABASE` (`qbox` by default) |
+| Delete Database | Off |
+
+Framework recipes such as QBox import their own SQL files. This repository only provides the database service.
+
 ## CasaOS
 
-Prepare the data directory and seccomp profile:
+Prepare the data directories and seccomp profile:
 
 ```bash
 sudo install -d -o 1000 -g 1000 /DATA/AppData/cfx-server-docker/txData
+sudo install -d /DATA/AppData/cfx-server-docker/mariadb
 sudo curl -fsSL https://raw.githubusercontent.com/itsmeares/cfx-server-docker/main/seccomp.json \
   -o /DATA/AppData/cfx-server-docker/seccomp.json
 ```
 
-Then import `casaos-compose.yaml` through CasaOS Custom Install.
+Import `casaos-compose.yaml` through CasaOS Custom Install. Before submitting, replace these two values under the `mariadb` service with long random passwords:
+
+- `REPLACE_WITH_A_LONG_RANDOM_ROOT_PASSWORD`
+- `REPLACE_WITH_A_LONG_RANDOM_DATABASE_PASSWORD`
 
 The CasaOS compose uses the standard host ports by default. Change the left-hand side of the port mappings before installation when those ports are already in use.
 
@@ -48,6 +76,8 @@ The CasaOS compose uses the standard host ports by default. Change the left-hand
 | --- | --- | --- |
 | `30120` | TCP/UDP | FiveM server |
 | `40120` | TCP | txAdmin |
+
+MariaDB does not publish a host port.
 
 ## Important
 
