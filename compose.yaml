@@ -6,6 +6,10 @@ services:
     stdin_open: true
     tty: true
 
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
     security_opt:
       - seccomp=./seccomp.json
 
@@ -23,3 +27,23 @@ services:
       - "30120:30120/tcp"
       - "30120:30120/udp"
       - "40120:40120/tcp"
+
+  mariadb:
+    image: mariadb:12.3.2
+    restart: unless-stopped
+
+    environment:
+      MARIADB_ROOT_PASSWORD: "${MARIADB_ROOT_PASSWORD:?Set MARIADB_ROOT_PASSWORD in .env}"
+      MARIADB_DATABASE: "${MARIADB_DATABASE:-qbox}"
+      MARIADB_USER: "${MARIADB_USER:-qbox}"
+      MARIADB_PASSWORD: "${MARIADB_PASSWORD:?Set MARIADB_PASSWORD in .env}"
+
+    volumes:
+      - ./mariadb:/var/lib/mysql
+
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
