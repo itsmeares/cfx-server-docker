@@ -1,0 +1,47 @@
+name: cfx-server-docker
+
+services:
+  cfx-server:
+    image: ghcr.io/itsmeares/cfx-server-docker:98-ea
+    container_name: cfx-server-enhanced
+    hostname: cfx-server-enhanced
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+
+    security_opt:
+      - seccomp=/DATA/AppData/cfx-server-docker/seccomp.json
+
+    environment:
+      TXHOST_DATA_PATH: /txData
+      TXHOST_GAME_NAME: fivem
+      TXHOST_TXA_PORT: "40120"
+      TXHOST_FXS_PORT: "30120"
+      TXHOST_INTERFACE: 0.0.0.0
+
+    volumes:
+      - /DATA/AppData/cfx-server-docker/txData:/txData
+
+    ports:
+      - "30120:30120/tcp"
+      - "30120:30120/udp"
+      - "40120:40120/tcp"
+
+x-casaos:
+  architectures:
+    - amd64
+  main: cfx-server
+  store_app_id: cfx-server-docker
+  category: Games
+  author: itsmeares
+  developer: Cfx.re
+  icon: https://avatars.githubusercontent.com/u/25160833?s=200&v=4
+  title:
+    en_us: Cfx Server Enhanced
+  tagline:
+    en_us: FiveM server for GTAV Enhanced
+  description:
+    en_us: Experimental Cfx Server build for FiveM GTAV Enhanced with txAdmin.
+  port_map: "40120"
+  scheme: http
+  index: /
