@@ -53,6 +53,37 @@ services:
       retries: 10
       start_period: 30s
 
+  dbgate:
+    image: dbgate/dbgate:7.2.3-alpine
+    container_name: cfx-server-dbgate
+    hostname: dbgate
+    restart: unless-stopped
+
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+    environment:
+      LOGIN: admin
+      PASSWORD: REPLACE_WITH_A_LONG_RANDOM_DBGATE_PASSWORD
+      CONNECTIONS: qbox
+      LABEL_qbox: QBox MariaDB
+      SERVER_qbox: mariadb
+      USER_qbox: qbox
+      PASSWORD_MODE_qbox: askPassword
+      PORT_qbox: "3306"
+      DATABASE_qbox: qbox
+      ENGINE_qbox: mariadb@dbgate-plugin-mysql
+      SINGLE_CONNECTION: qbox
+      SINGLE_DATABASE: qbox
+      LANGUAGE: en
+
+    volumes:
+      - /DATA/AppData/cfx-server-docker/dbgate:/root/.dbgate
+
+    ports:
+      - "3002:3000/tcp"
+
 x-casaos:
   architectures:
     - amd64
@@ -67,7 +98,7 @@ x-casaos:
   tagline:
     en_us: FiveM server for GTAV Enhanced
   description:
-    en_us: Experimental Cfx Server build for FiveM GTAV Enhanced with txAdmin and MariaDB.
+    en_us: Experimental Cfx Server build for FiveM GTAV Enhanced with txAdmin, MariaDB, and DbGate.
   port_map: "40120"
   scheme: http
   index: /
