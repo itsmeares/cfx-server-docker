@@ -28,6 +28,18 @@ Get the registration PIN:
 docker compose logs cfx-server
 ```
 
+## CasaOS
+
+Prepare the data directory and seccomp profile:
+
+```bash
+sudo install -d -o 1000 -g 1000 /DATA/AppData/cfx-server-docker/txData
+sudo curl -fsSL https://raw.githubusercontent.com/itsmeares/cfx-server-docker/main/seccomp.json \
+  -o /DATA/AppData/cfx-server-docker/seccomp.json
+```
+
+Then import `casaos-compose.yaml` through CasaOS Custom Install.
+
 ## Ports
 
 | Port | Protocol | Purpose |
