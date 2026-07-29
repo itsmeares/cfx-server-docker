@@ -1,0 +1,25 @@
+services:
+  cfx-server:
+    image: ghcr.io/itsmeares/cfx-server-docker:98-ea
+    build: .
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+
+    security_opt:
+      - seccomp=./seccomp.json
+
+    environment:
+      TXHOST_DATA_PATH: /txData
+      TXHOST_GAME_NAME: fivem
+      TXHOST_TXA_PORT: "40120"
+      TXHOST_FXS_PORT: "30120"
+      TXHOST_INTERFACE: 0.0.0.0
+
+    volumes:
+      - ./txData:/txData
+
+    ports:
+      - "30120:30120/tcp"
+      - "30120:30120/udp"
+      - "40120:40120/tcp"
