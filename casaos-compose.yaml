@@ -23,9 +23,9 @@ services:
       - /DATA/AppData/cfx-server-docker/txData:/txData
 
     ports:
-      - "30121:30120/tcp"
-      - "30121:30120/udp"
-      - "40121:40120/tcp"
+      - "30120:30120/tcp"
+      - "30120:30120/udp"
+      - "40120:40120/tcp"
 
 x-casaos:
   architectures:
@@ -42,6 +42,6 @@ x-casaos:
     en_us: FiveM server for GTAV Enhanced
   description:
     en_us: Experimental Cfx Server build for FiveM GTAV Enhanced with txAdmin.
-  port_map: "40121"
+  port_map: "40120"
   scheme: http
   index: /
