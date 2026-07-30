@@ -17,6 +17,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Read Cfx Server build
+        id: cfx
+        shell: bash
+        run: |
+          set -euo pipefail
+          build=$(sed -nE 's/.*cfx-server-docker:([0-9]+)-ea.*/\1/p' compose.yaml)
+          [[ "$build" =~ ^[0-9]+$ ]]
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+
       - uses: docker/setup-buildx-action@v4
 
       - uses: docker/login-action@v4
@@ -31,5 +40,5 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: |
-            ghcr.io/itsmeares/cfx-server-docker:105-ea
+            ghcr.io/itsmeares/cfx-server-docker:${{ steps.cfx.outputs.build }}-ea
             ghcr.io/itsmeares/cfx-server-docker:latest
