@@ -1,0 +1,152 @@
+name: Check Cfx Server updates
+
+on:
+  schedule:
+    - cron: "23 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: cfx-server-update
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check for a newer Enhanced build
+        id: update
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tmpdir=$(mktemp -d)
+          trap 'rm -rf "$tmpdir"' EXIT
+
+          curl -fsSL --retry 3 --retry-delay 2 \
+            https://docs.fivem.net/docs/server-download/ \
+            -o "$tmpdir/page.html"
+
+          sed -n 's#.*<script id="__NEXT_DATA__" type="application/json">\(.*\)</script>.*#\1#p' \
+            "$tmpdir/page.html" > "$tmpdir/next-data.json"
+          test -s "$tmpdir/next-data.json"
+
+          artifact=$(jq -er '
+            [.. | objects
+              | select(.displayName? == "cfx-server_linux_x64.tar.xz")
+              | select((.subtitle? // "") | test("^build [0-9]+$"))]
+            | first
+            | [(.subtitle | sub("^build "; "")), .downloadURL]
+            | @tsv
+          ' "$tmpdir/next-data.json")
+
+          IFS=$'\t' read -r build url <<< "$artifact"
+          [[ "$build" =~ ^[0-9]+$ ]]
+
+          case "$url" in
+            https://downloads.cfx-services.net/prod/*/cfx-server_linux_x64.tar.xz) ;;
+            *) echo "Refusing unexpected artifact URL: $url" >&2; exit 1 ;;
+          esac
+
+          current=$(sed -nE 's/.*cfx-server-docker:([0-9]+)-ea.*/\1/p' compose.yaml)
+          [[ "$current" =~ ^[0-9]+$ ]]
+
+          if (( build <= current )); then
+            echo "Cfx Server b$current is current."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          curl -fsSL --retry 3 --retry-delay 2 "$url" \
+            -o "$tmpdir/cfx-server.tar.xz"
+          sha256=$(sha256sum "$tmpdir/cfx-server.tar.xz" | awk '{print $1}')
+          xz -t "$tmpdir/cfx-server.tar.xz"
+
+          mkdir "$tmpdir/server"
+          tar -xJf "$tmpdir/cfx-server.tar.xz" -C "$tmpdir/server"
+          test -x "$tmpdir/server/run.sh"
+          test -r "$tmpdir/server/alpine/opt/cfx-server/cfx-server"
+
+          sed -i \
+            -e "s|^ARG CFX_ARTIFACT_URL=.*|ARG CFX_ARTIFACT_URL=$url|" \
+            -e "s|^ARG CFX_ARTIFACT_SHA256=.*|ARG CFX_ARTIFACT_SHA256=$sha256|" \
+            Dockerfile
+
+          sed -i "s/${current}-ea/${build}-ea/g" \
+            README.md casaos-compose.yaml compose.yaml
+
+          grep -Fqx "ARG CFX_ARTIFACT_URL=$url" Dockerfile
+          grep -Fqx "ARG CFX_ARTIFACT_SHA256=$sha256" Dockerfile
+
+          for file in README.md casaos-compose.yaml compose.yaml; do
+            grep -Fq "${build}-ea" "$file"
+            if grep -Fq "${current}-ea" "$file"; then
+              echo "Old build tag remains in $file." >&2
+              exit 1
+            fi
+          done
+
+          {
+            echo "changed=true"
+            echo "build=$build"
+            echo "url=$url"
+            echo "sha256=$sha256"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open draft update pull request
+        if: steps.update.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD: ${{ steps.update.outputs.build }}
+          ARTIFACT_URL: ${{ steps.update.outputs.url }}
+          ARTIFACT_SHA256: ${{ steps.update.outputs.sha256 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          branch="feat/cfx-server-b${BUILD}"
+          if (( $(gh pr list --state open --head "$branch" --json number --jq 'length') > 0 )); then
+            echo "An update PR for b${BUILD} is already open."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add Dockerfile README.md casaos-compose.yaml compose.yaml
+          git commit -m "Update Cfx Server to b${BUILD}"
+
+          git push origin --delete "$branch" 2>/dev/null || true
+          git push --set-upstream origin "$branch"
+
+          cat > "$RUNNER_TEMP/cfx-update-pr.md" <<EOF
+          ## Summary
+
+          - update Cfx Server Enhanced from the current build to b${BUILD}
+          - pin the downloaded artifact URL and verified SHA-256
+          - update Docker Compose, CasaOS Compose, and README image references
+
+          ## Artifact
+
+          - URL: \`${ARTIFACT_URL}\`
+          - SHA-256: \`${ARTIFACT_SHA256}\`
+
+          ## Validation
+
+          - downloaded the artifact directly from Cfx.re
+          - verified its xz integrity
+          - extracted it and checked the expected server binaries
+          EOF
+
+          gh pr create \
+            --draft \
+            --base main \
+            --head "$branch" \
+            --title "Update Cfx Server to b${BUILD}" \
+            --body-file "$RUNNER_TEMP/cfx-update-pr.md"
