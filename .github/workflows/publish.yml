@@ -31,5 +31,5 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: |
-            ghcr.io/itsmeares/cfx-server-docker:103-ea
+            ghcr.io/itsmeares/cfx-server-docker:105-ea
             ghcr.io/itsmeares/cfx-server-docker:latest
