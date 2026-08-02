@@ -39,8 +39,8 @@ services:
 
     environment:
       MARIADB_ROOT_PASSWORD: REPLACE_WITH_A_LONG_RANDOM_ROOT_PASSWORD
-      MARIADB_DATABASE: qbox
-      MARIADB_USER: qbox
+      MARIADB_DATABASE: cfxserver
+      MARIADB_USER: cfxserver
       MARIADB_PASSWORD: REPLACE_WITH_A_LONG_RANDOM_DATABASE_PASSWORD
 
     volumes:
@@ -66,23 +66,23 @@ services:
     environment:
       LOGIN: admin
       PASSWORD: REPLACE_WITH_A_LONG_RANDOM_DBGATE_PASSWORD
-      CONNECTIONS: qbox
-      LABEL_qbox: QBox MariaDB
-      SERVER_qbox: mariadb
-      USER_qbox: qbox
-      PASSWORD_MODE_qbox: askPassword
-      PORT_qbox: "3306"
-      DATABASE_qbox: qbox
-      ENGINE_qbox: mariadb@dbgate-plugin-mysql
-      SINGLE_CONNECTION: qbox
-      SINGLE_DATABASE: qbox
+      CONNECTIONS: cfxserver
+      LABEL_cfxserver: Cfx Server MariaDB
+      SERVER_cfxserver: mariadb
+      USER_cfxserver: cfxserver
+      PASSWORD_MODE_cfxserver: askPassword
+      PORT_cfxserver: "3306"
+      DATABASE_cfxserver: cfxserver
+      ENGINE_cfxserver: mariadb@dbgate-plugin-mysql
+      SINGLE_CONNECTION: cfxserver
+      SINGLE_DATABASE: cfxserver
       LANGUAGE: en
 
     volumes:
       - /DATA/AppData/cfx-server-docker/dbgate:/root/.dbgate
 
     ports:
-      - "3002:3000/tcp"
+      - "3000:3000/tcp"
 
 x-casaos:
   architectures:
