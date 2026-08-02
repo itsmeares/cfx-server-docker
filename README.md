@@ -33,7 +33,7 @@ http://localhost:40120
 Open DbGate at:
 
 ```text
-http://localhost:3002
+http://localhost:3000
 ```
 
 The default Compose configuration binds DbGate to `127.0.0.1`. To access it from another device on the LAN, set `DBGATE_BIND_ADDRESS` in `.env` to the server's LAN address. Do not expose DbGate through router port forwarding or a public reverse proxy.
@@ -54,16 +54,16 @@ Use these values when a txAdmin recipe asks for database details:
 | --- | --- |
 | Database Host | `mariadb` |
 | Database Port | `3306` |
-| Database Username | Value of `MARIADB_USER` (`qbox` by default) |
+| Database Username | Value of `MARIADB_USER` (`cfxserver` by default) |
 | Database Password | Value of `MARIADB_PASSWORD` |
-| Database Name | Value of `MARIADB_DATABASE` (`qbox` by default) |
+| Database Name | Value of `MARIADB_DATABASE` (`cfxserver` by default) |
 | Delete Database | Off |
 
-Framework recipes such as QBox import their own SQL files. This repository only provides the database service.
+Framework recipes import their own SQL files. This repository only provides the database service.
 
 ## DbGate
 
-DbGate is preconfigured with a single MariaDB connection restricted to the configured QBox database. Sign in with `DBGATE_LOGIN` and `DBGATE_PASSWORD`, then enter `MARIADB_PASSWORD` when opening the database connection.
+DbGate is preconfigured with a single MariaDB connection restricted to the configured database. Sign in with `DBGATE_LOGIN` and `DBGATE_PASSWORD`, then enter `MARIADB_PASSWORD` when opening the database connection.
 
 DbGate data, including saved scripts and application settings, is stored in the `dbgate` volume directory.
 
@@ -85,7 +85,7 @@ Import `casaos-compose.yaml` through CasaOS Custom Install. Before submitting, r
 - `REPLACE_WITH_A_LONG_RANDOM_DATABASE_PASSWORD`
 - `REPLACE_WITH_A_LONG_RANDOM_DBGATE_PASSWORD`
 
-The CasaOS Compose publishes DbGate on host port `3002`. Keep it accessible only from the trusted LAN and change the left-hand side of the mapping if the port is already in use.
+The CasaOS Compose publishes DbGate on its default host port `3000`. Keep it accessible only from the trusted LAN and change the left-hand side of the mapping if the port is already in use.
 
 The CasaOS Compose uses the standard FiveM and txAdmin host ports by default. Change the left-hand side of the port mappings before installation when those ports are already in use.
 
@@ -95,7 +95,7 @@ The CasaOS Compose uses the standard FiveM and txAdmin host ports by default. Ch
 | --- | --- | --- |
 | `30120` | TCP/UDP | FiveM server |
 | `40120` | TCP | txAdmin |
-| `3002` | TCP | DbGate web interface |
+| `3000` | TCP | DbGate web interface |
 
 MariaDB does not publish a host port.
 

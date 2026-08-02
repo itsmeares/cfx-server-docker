@@ -34,8 +34,8 @@ services:
 
     environment:
       MARIADB_ROOT_PASSWORD: "${MARIADB_ROOT_PASSWORD:?Set MARIADB_ROOT_PASSWORD in .env}"
-      MARIADB_DATABASE: "${MARIADB_DATABASE:-qbox}"
-      MARIADB_USER: "${MARIADB_USER:-qbox}"
+      MARIADB_DATABASE: "${MARIADB_DATABASE:-cfxserver}"
+      MARIADB_USER: "${MARIADB_USER:-cfxserver}"
       MARIADB_PASSWORD: "${MARIADB_PASSWORD:?Set MARIADB_PASSWORD in .env}"
 
     volumes:
@@ -59,20 +59,20 @@ services:
     environment:
       LOGIN: "${DBGATE_LOGIN:-admin}"
       PASSWORD: "${DBGATE_PASSWORD:?Set DBGATE_PASSWORD in .env}"
-      CONNECTIONS: qbox
-      LABEL_qbox: QBox MariaDB
-      SERVER_qbox: mariadb
-      USER_qbox: "${MARIADB_USER:-qbox}"
-      PASSWORD_MODE_qbox: askPassword
-      PORT_qbox: "3306"
-      DATABASE_qbox: "${MARIADB_DATABASE:-qbox}"
-      ENGINE_qbox: mariadb@dbgate-plugin-mysql
-      SINGLE_CONNECTION: qbox
-      SINGLE_DATABASE: "${MARIADB_DATABASE:-qbox}"
+      CONNECTIONS: cfxserver
+      LABEL_cfxserver: Cfx Server MariaDB
+      SERVER_cfxserver: mariadb
+      USER_cfxserver: "${MARIADB_USER:-cfxserver}"
+      PASSWORD_MODE_cfxserver: askPassword
+      PORT_cfxserver: "3306"
+      DATABASE_cfxserver: "${MARIADB_DATABASE:-cfxserver}"
+      ENGINE_cfxserver: mariadb@dbgate-plugin-mysql
+      SINGLE_CONNECTION: cfxserver
+      SINGLE_DATABASE: "${MARIADB_DATABASE:-cfxserver}"
       LANGUAGE: en
 
     volumes:
       - ./dbgate:/root/.dbgate
 
     ports:
-      - "${DBGATE_BIND_ADDRESS:-127.0.0.1}:${DBGATE_PORT:-3002}:3000"
+      - "${DBGATE_BIND_ADDRESS:-127.0.0.1}:${DBGATE_PORT:-3000}:3000"
