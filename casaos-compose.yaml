@@ -2,7 +2,7 @@ name: cfx-server-docker
 
 services:
   cfx-server:
-    image: ghcr.io/itsmeares/cfx-server-docker:107-ea
+    image: ghcr.io/itsmeares/cfx-server-docker:110-ea
     container_name: cfx-server-enhanced
     hostname: cfx-server-enhanced
     restart: unless-stopped
