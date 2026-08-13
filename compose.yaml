@@ -1,6 +1,6 @@
 services:
   cfx-server:
-    image: ghcr.io/itsmeares/cfx-server-docker:118-ea
+    image: ghcr.io/itsmeares/cfx-server-docker:119-ea
     build: .
     restart: unless-stopped
     stdin_open: true
