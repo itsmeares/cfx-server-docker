@@ -2,7 +2,7 @@
 
 Minimal Docker image for **Cfx Server / FiveM for GTAV Enhanced (early access)**.
 
-- Cfx Server build `129-ea`
+- Cfx Server build `139-ea`
 - txAdmin included
 - MariaDB `12.3.2` included in the Compose setup
 - DbGate `7.2.3-alpine` included for browser-based database administration
