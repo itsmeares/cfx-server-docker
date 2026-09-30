@@ -4,8 +4,8 @@ ARG ALPINE_VERSION=3.22
 
 FROM alpine:${ALPINE_VERSION} AS download
 
-ARG CFX_ARTIFACT_URL=https://downloads.cfx-services.net/prod/01a0d46a-747b-71a1-a8aa-5e8e5b9e9b28/cfx-server_linux_x64.tar.xz
-ARG CFX_ARTIFACT_SHA256=b55595183d6797b09856218816d67bb9a50dede1845db09f7dc5ca6fca884906
+ARG CFX_ARTIFACT_URL=https://downloads.cfx-services.net/prod/01a0f2a8-4538-7a28-8962-d06f62d31f1e/cfx-server_linux_x64.tar.xz
+ARG CFX_ARTIFACT_SHA256=657a170b062180ab1cd72aaedc567fa6fad5b476e0b6693c8ad6114968578049
 
 RUN apk add --no-cache ca-certificates curl xz \
     && curl -fsSL "${CFX_ARTIFACT_URL}" -o /tmp/cfx-server.tar.xz \
