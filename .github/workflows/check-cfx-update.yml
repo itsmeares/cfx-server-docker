@@ -116,8 +116,17 @@ jobs:
           set -euo pipefail
 
           branch="feat/cfx-server-b${BUILD}"
+          finish_update() {
+            if [[ "$(gh pr view "$branch" --json isDraft --jq '.isDraft')" == "true" ]]; then
+              gh pr ready "$branch"
+            fi
+          
+            gh pr merge "$branch" --squash --delete-branch
+            gh workflow run publish.yml --ref main
+          }
+          
           if (( $(gh pr list --state open --head "$branch" --json number --jq 'length') > 0 )); then
-            echo "An update PR for b${BUILD} is already open."
+            finish_update
             exit 0
           fi
 
@@ -154,3 +163,5 @@ jobs:
             --head "$branch" \
             --title "Update Cfx Server to b${BUILD}" \
             --body-file "$RUNNER_TEMP/cfx-update-pr.md"
+
+          finish_update
