@@ -104,7 +104,7 @@ jobs:
         if: steps.update.outputs.changed == 'true'
         run: docker build --pull -t cfx-update-test .
 
-      - name: Open draft update pull request
+      - name: Open update pull request
         if: steps.update.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -150,7 +150,6 @@ jobs:
           EOF
 
           gh pr create \
-            --draft \
             --base main \
             --head "$branch" \
             --title "Update Cfx Server to b${BUILD}" \
